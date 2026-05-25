@@ -29,11 +29,17 @@
 
         .background-container {
     position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
-    z-index: 1;
+
     opacity: 0;
-    transition: opacity 1s;
+
+    transition: opacity 1s ease;
+
+    z-index: 0;
+
+    pointer-events: none;
 }
 
         .background-image {
@@ -43,10 +49,12 @@
 }
 
         .stars {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-        }
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    transition: opacity 1s;
+}
 
         .star-field {
             position: absolute;
@@ -101,9 +109,13 @@
             50% { opacity: 1; }
         }
 
+        .player.boarding {
+    bottom: 250px;
+}
+
         .ship-engine {
             position: absolute;
-            bottom: -15px;
+            bottom: 220px;
             left: 50%;
             transform: translateX(-50%);
             width: 30px;
@@ -258,10 +270,24 @@
             z-index: 5;
         }
 
-        .player.boarding {
-            opacity: 0;
-            bottom: 250px;
-        }
+        .player {
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 48px;
+    background-image: url('./image/pxArt.png');
+    background-size: 32px 48px;
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+    opacity: 0;
+    z-index: 5;
+
+    transition:
+        bottom 1s ease,
+        opacity 1s ease;
+}
 
         .ground {
             position: absolute;
@@ -401,11 +427,11 @@
         }
 
         .ship-dialogue p {
-            color: #fff;
-            font-size: 10px;
-            line-height: 2;
-            text-shadow: 2px 2px #000;
-        }
+    color: #fff;
+    font-size: 14px;
+    line-height: 2;
+    text-shadow: 2px 2px #000;
+}
 
         .ship-dialogue .arrow {
             color: #00ffaa;
@@ -413,7 +439,7 @@
             left: 50%;
             transform: translateX(-50%);
             animation: bounce 0.5s ease-in-out infinite;
-            margin-top: 15px;
+            margin-top: -10px;
         }
 
         @keyframes bounce {
@@ -424,6 +450,11 @@
 </head>
 <body>
     <div class="game-screen" id="screen">
+     
+        <div class="background-container" id="bgContainer">
+    <img src="image/theemper.png" id="background" class="background-image">
+</div>
+    
         <div class="stars" id="stars">
             <div class="star-field" id="starField"></div>
         </div>
@@ -476,9 +507,6 @@
         </div>
     </div>
 
-<div class="background-container" id="bgContainer">
-    <img src="image/themper.png" id="background" class="background-image" alt="Fundo">
-</div>
 
 <script>
     const spaceship = document.getElementById('spaceship');
@@ -523,15 +551,17 @@
     }
 
     function showNextBubble() {
-        if (currentBubble >= bubbles.length) {
-            dialogueActive = false;
-            advanceHint.classList.remove('show');
-            setTimeout(() => {
-                documentScene.classList.add('show');
-                nameInput.focus();
-            }, 500);
-            return;
-        }
+       if (currentBubble >= bubbles.length) {
+    dialogueActive = false;
+    advanceHint.classList.remove('show');
+
+    setTimeout(() => {
+        documentScene.classList.add('show');
+        nameInput.focus();
+    }, 500);
+
+    return;
+}
 
         const bubble = bubbles[currentBubble];
         const element = document.getElementById(bubble.element);
@@ -596,23 +626,40 @@
     }
 
     function teleportBackToShip() {
-        teleportBeam.classList.add('active');
-        
+
+    teleportBeam.classList.add('active');
+
+    setTimeout(() => {
+
+        player.classList.add('boarding');
+
+    }, 300);
+
+    // SOME SOMENTE AQUI
+    setTimeout(() => {
+
+        player.style.opacity = '0';
+
+    }, 1000);
+
+    setTimeout(() => {
+
+        documentScene.classList.remove('show');
+
+        teleportBeam.classList.remove('active');
+
+        spaceship.style.top = '120px';
+
+        nextSceneHint.classList.add('show');
+
         setTimeout(() => {
-            player.classList.add('boarding');
-        }, 300);
-        
-        setTimeout(() => {
-            documentScene.classList.remove('show');
-            teleportBeam.classList.remove('active');
-            spaceship.style.top = '120px';
-            nextSceneHint.classList.add('show');
-            
-            setTimeout(() => {
-                startFlyScene();
-            }, 2000);
-        }, 1500);
-    }
+
+            startFlyScene();
+
+        }, 2000);
+
+    }, 1500);
+}
 
     function startFlyScene() {
         gamePhase = 'flying';
@@ -633,57 +680,75 @@
 
     // NOVA CUTSCENE: POUSO
     function startLanding() {
-        gamePhase = 'landing';
-        
-        // Para movimento das estrelas
-        starField.classList.remove('moving');
-        shipDialogue.classList.remove('show');
-        
-        // Motor fica mais forte para descida
-        shipEngine.classList.add('active');
-        
-        // Desce a nave lentamente
-        let landingPos = 200;
-        let descending = true;
-        
-        function descend() {
-            if (!descending || gamePhase !== 'landing') return;
-            
-            landingPos -= 1.5;
-            spaceship.style.top = landingPos + 'px';
-            
-            // Bala de fogo fica mais intensa durante descida
-            if (landingPos > 150) {
-                shipEngine.style.transform = 'translateX(-50%) scale(1.5)';
-                shipEngine.style.opacity = '1';
-            }
-            
-            if (landingPos > 100) {
-                requestAnimationFrame(descend);
-            } else {
-                // Pousou!
-                spaceship.style.top = '100px';
-                shipEngine.classList.remove('active');
-                shipEngine.style.transform = 'translateX(-50%) scale(1)';
-                
-                // Mostra fundo (imagem do planeta)
-                bgContainer.style.opacity = '1';
-                
-                // Mensagem de pouso
-                setTimeout(() => {
-                    shipDialogue.querySelector('p').textContent = 'Pouso concluído!';
-                    shipDialogue.classList.add('show');
-                    
-                    setTimeout(() => {
-                        title.classList.add('visible');
-                        continueHint.classList.add('show');
-                        gamePhase = 'complete';
-                    }, 1500);
-                }, 500);
-            }
-        }
-        
-        setTimeout(descend, 500);
+
+    gamePhase = 'landing';
+
+    // para estrelas
+    starField.classList.remove('moving');
+
+    // esconde cena espacial
+    document.getElementById('stars').style.opacity = '0';
+
+    ground.style.opacity = '0';
+
+    shipDialogue.classList.remove('show');
+
+    // liga motor
+    shipEngine.classList.add('active');
+
+    // nave desaparece da viagem
+    spaceship.style.opacity = '0';
+
+    setTimeout(() => {
+
+        // mostra planeta
+        bgContainer.style.opacity = '1';
+
+        // reposiciona nave acima da tela
+        spaceship.style.transition = 'none';
+
+        spaceship.style.top = '-120px';
+
+        shipEngine.style.bottom = '520px';
+
+        spaceship.style.opacity = '1';
+
+                // pequena pausa
+        setTimeout(() => {
+
+            // anima descida
+            spaceship.style.transition = 'top 4s linear';
+
+            shipEngine.style.transition = 'bottom 4s linear';
+
+            spaceship.style.top = '180px';
+
+            shipEngine.style.bottom = '220px';
+
+        }, 100);
+
+        // termina pouso
+        setTimeout(() => {
+
+            shipEngine.classList.remove('active');
+
+            shipDialogue.querySelector('p').textContent = 'Pouso concluído!';
+
+            shipDialogue.classList.add('show');
+
+            setTimeout(() => {
+
+                title.classList.add('visible');
+
+                continueHint.classList.add('show');
+
+                gamePhase = 'complete';
+
+            }, 1500);
+
+        }, 4500);
+
+    }, 500);
     }
 
     nameInput.addEventListener('keypress', function(e) {
@@ -697,31 +762,51 @@
             }, 500);
         }
     });
+    
 
-    screen.addEventListener('click', function() {
-        if (!dialogueActive) {
-            title.classList.add('visible');
-            continueHint.classList.add('show');
-            return;
-        }
+   screen.addEventListener('click', function() {
 
-        hideCurrentBubble();
-        advanceHint.classList.remove('show');
+    // CUTSCENE DO VOO
+    if (gamePhase === 'flying') {
+        startLanding();
+        document.getElementById('stars').style.opacity = '0';
         
-        setTimeout(() => {
-            showNextBubble();
-        }, 300);
+        ground.style.opacity = '0';
         
-        // Se estiver voando, inicia pouso
-        if (gamePhase === 'flying') {
-            startLanding();
-        }
-    });
+        shipDialogue.classList.remove('show');
+        
+        starField.classList.remove('moving');
+        
+        document.getElementById('stars').style.opacity = '0';
+        
+        shipDialogue.classList.remove('show');
+        
+        gamePhase = 'landing';
+
+        bgContainer.style.opacity = '1';
+        return;
+    }
+
+    // CUTSCENE FINAL
+    if (gamePhase === 'complete') {
+        return;
+    }
+
+    // DIALOGOS
+    if (!dialogueActive) {
+        return;
+    }
+
+    hideCurrentBubble();
+    advanceHint.classList.remove('show');
+
+    setTimeout(() => {
+        showNextBubble();
+    }, 300);
+});
 
     createStars();
     playCutscene();
 </script>
-</body>
-</html>
 </body>
 </html>
