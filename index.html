@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Pixel - Aventura</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        .game-screen {
+            width: 640px;
+            height: 480px;
+            background: linear-gradient(to bottom, #0a0a1a 0%, #1a1a2e 50%, #0f0f23 100%);
+            position: relative;
+            border: 4px solid #333;
+            overflow: hidden;
+        }
+
+        /* Estrelas */
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #fff;
+            border-radius: 50%;
+            opacity: 0.5;
+        }
+
+        /* NAVE */
+       .spaceship {
+    position: absolute;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    width: 64px;
+    height: 64px;
+
+    background-image: url('image/navepixel.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: transparent;
+
+    image-rendering: pixelated;
+
+    z-index: 10;
+    opacity: 1;
+
+    transition: top 1s ease-out;
+}
+}
+
+        .spaceship.visible {
+            top: 180px;
+        }
+
+        /* Luz da nave */
+        .spaceship.visible::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 30px;
+            background: radial-gradient(ellipse, rgba(255,200,100,0.8) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: flicker 0.1s infinite;
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+
+        /* BALÃO DA NAVE - MAIOR E COM QUEBRA DE LINHA */
+        .ship-bubble {
+            position: absolute;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            background-color: #ffffff;
+            border: 3px solid #000000;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 8px;
+            color: #000000;
+            white-space: normal;
+            text-align: center;
+            z-index: 15;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            max-width: 350px;
+            min-width: 200px;
+            line-height: 1.6;
+        }
+
+        .ship-bubble.show {
+            transform: translateX(-50%) scale(1);
+        }
+
+        .ship-bubble::after {
+            content: '';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 0 10px 10px 10px;
+            border-style: solid;
+            border-color: #000000 transparent transparent transparent;
+        }
+
+        .ship-bubble::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 0 8px 8px 8px;
+            border-style: solid;
+            border-color: #ffffff transparent transparent transparent;
+            z-index: 1;
+        }
+
+        /* BALÃO DO PERSONAGEM - MAIOR E COM QUEBRA DE LINHA */
+        .player-bubble {
+            position: absolute;
+            bottom: 150px;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            background-color: #fff;
+            border: 3px solid #000;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 8px;
+            z-index: 20;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            max-width: 300px;
+            min-width: 150px;
+            white-space: normal;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .player-bubble.show {
+            transform: translateX(-50%) scale(1);
+        }
+
+        .player-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 10px 10px 0;
+            border-style: solid;
+            border-color: #000 transparent transparent;
+        }
+
+        .player-bubble::before {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 8px 8px 0;
+            border-style: solid;
+            border-color: #fff transparent transparent;
+            z-index: 1;
+        }
+
+        /* PERSONAGEM */
+        .player {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 32px;
+            height: 48px;
+            background-image: url('./image/pxArt.png');
+            background-size: 32px 48px;
+            background-repeat: no-repeat;
+            image-rendering: pixelated;
+            opacity: 0;
+            z-index: 5;
+        }
+
+        /* Chão */
+        .ground {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(to bottom, #1a1a2e, #0a0a1a);
+            border-top: 4px solid #333;
+        }
+
+        .game-title {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #666;
+            font-size: 8px;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+
+        .game-title.visible {
+            opacity: 1;
+        }
+
+        .continue-hint {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #888;
+            font-size: 8px;
+            opacity: 0;
+            animation: blink 1s infinite;
+        }
+
+        .continue-hint.show {
+            opacity: 1;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .advance-hint {
+            position: absolute;
+            bottom: 110px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #aaa;
+            font-size: 7px;
+            opacity: 0;
+            animation: blink 1s infinite;
+        }
+
+        .advance-hint.show {
+            opacity: 1;
+        }
+        /* =========================
+   DOCUMENTO
+========================= */
+
+        .document-scene {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+        }
+
+        .document-scene.show {
+            display: flex;
+        }
+
+        .document-image {
+            width: 420px;
+            image-rendering: pixelated;
+        }
+
+        .document-input {
+            position: absolute;
+            top: 295px;
+            left: 150px;
+            width: 145px;
+            height: 24px;
+            border: 2px solid #000;
+            background: white;
+            padding: 4px;
+            outline: none;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 7px;
+        }
+
+        /* Animação de sumir */
+        .document-scene.hiding {
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-screen" id="screen">
+        <div class="stars" id="stars"></div>
+        
+        <div class="game-title" id="title">QUIZ PIXEL ADVENTURE</div>
+        
+        <!-- NAVE -->
+        <div class="spaceship" id="spaceship"></div>
+        
+        <!-- Balões da nave -->
+        <div class="ship-bubble" id="shipBubble1">
+            colocamos você aqui pela ordem do nosso imperador viltrumita (vitor sinuquinha), mas não se preocupe, você pode sair...
+        </div>
+        
+        <div class="ship-bubble" id="shipBubble2">
+            simples! basta assinar esse papelzinho aqui, e a gente te leva pra casa rapidinho...
+        </div>
+        
+        <!-- PERSONAGEM -->
+        <div class="player" id="player"></div>
+        
+        <!-- Balões do personagem -->
+        <div class="player-bubble" id="playerBubble1">
+            oh, onde estou?
+        </div>
+        
+        <div class="player-bubble" id="playerBubble2">
+            posso? como?
+        </div>
+
+        <!-- Documento -->
+        <div class="document-scene" id="documentScene">
+            <img src="image/certidao-de-casamento.png" class="document-image">
+            <input 
+                type="text" 
+                id="nameInput"
+                class="document-input"
+                placeholder="Digite aqui..."
+            >
+        </div>
+        
+        <!-- Chão -->
+        <div class="ground"></div>
+        
+        <!-- Hints -->
+        <div class="advance-hint" id="advanceHint">
+            ▼ Clique para continuar
+        </div>
+        
+        <div class="continue-hint" id="continueHint">
+            FIM DA CUTSCENE
+        </div>
+    </div>
+
+    <script>
+        // Elementos
+        const spaceship = document.getElementById('spaceship');
+        const player = document.getElementById('player');
+        const screen = document.getElementById('screen');
+        const starsContainer = document.getElementById('stars');
+        const title = document.getElementById('title');
+        const advanceHint = document.getElementById('advanceHint');
+        const continueHint = document.getElementById('continueHint');
+        const documentScene = document.getElementById('documentScene');
+        const nameInput = document.getElementById('nameInput');
+
+        // Balões - ordem correta do diálogo
+        const bubbles = [
+            { element: 'playerBubble1', type: 'player' },
+            { element: 'shipBubble1', type: 'ship' },
+            { element: 'playerBubble2', type: 'player' },
+            { element: 'shipBubble2', type: 'ship' }
+        ];
+
+        let currentBubble = 0;
+        let dialogueActive = true;
+
+        // Criar estrelas
+        function createStars() {
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 80 + '%';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Mostrar próximo balão
+        function showNextBubble() {
+            if (currentBubble >= bubbles.length) {
+                dialogueActive = false;
+                advanceHint.classList.remove('show');
+
+                // Mostrar documento
+                setTimeout(() => {
+                    documentScene.classList.add('show');
+                    nameInput.focus(); // Foca no input automaticamente
+                }, 500);
+
+                return;
+            }
+
+            const bubble = bubbles[currentBubble];
+            const element = document.getElementById(bubble.element);
+            
+            if (element) {
+                element.classList.add('show');
+                currentBubble++;
+                
+                if (currentBubble < bubbles.length) {
+                    setTimeout(() => {
+                        advanceHint.classList.add('show');
+                    }, 500);
+                }
+            }
+        }
+
+        // Esconder balão atual
+        function hideCurrentBubble() {
+            if (currentBubble > 0) {
+                const prevBubble = bubbles[currentBubble - 1];
+                const element = document.getElementById(prevBubble.element);
+                if (element) {
+                    element.classList.remove('show');
+                }
+            }
+        }
+
+        // Cutscene inicial
+        function playCutscene() {
+            setTimeout(() => {
+                spaceship.classList.add('.visible');
+            }, 500);
+
+            setTimeout(() => {
+                player.style.opacity = '1';
+                startFall();
+            }, 1500);
+
+            setTimeout(() => {
+                showNextBubble();
+            }, 2500);
+        }
+
+        // Queda
+        let fallPosition = 220;
+        let falling = false;
+        
+        function startFall() {
+            falling = true;
+            fall();
+        }
+        
+        function fall() {
+            if (!falling) return;
+            
+            fallPosition -= 8;
+            player.style.bottom = fallPosition + 'px';
+            
+            if (fallPosition > 80) {
+                requestAnimationFrame(fall);
+            } else {
+                player.style.bottom = '80px';
+            }
+        }
+
+        // Ocultar documento quando pressionar Enter
+        nameInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && nameInput.value.trim() !== '') {
+                // Adiciona classe de transição
+                documentScene.classList.add('hiding');
+                
+                // Esconde após a transição
+                setTimeout(() => {
+                    documentScene.classList.remove('show');
+                    documentScene.classList.remove('hiding');
+                    
+                    // Mostra tela de conclusão
+                    title.classList.add('visible');
+                    continueHint.classList.add('show');
+                }, 500);
+            }
+        });
+
+        // Clique para advance
+        screen.addEventListener('click', function() {
+            if (!dialogueActive) {
+                title.classList.add('visible');
+                continueHint.classList.add('show');
+                return;
+            }
+
+            hideCurrentBubble();
+            advanceHint.classList.remove('show');
+            
+            setTimeout(() => {
+                showNextBubble();
+            }, 300);
+            
+        });
+
+        // Iniciar
+        createStars();
+        playCutscene();
+    </script>
+</body>
+</html>
