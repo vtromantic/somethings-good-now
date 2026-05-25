@@ -27,45 +27,63 @@
             overflow: hidden;
         }
 
-        /* Estrelas */
+        .background-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 1s;
+}
+
+        .background-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
         .stars {
             position: absolute;
             width: 100%;
             height: 100%;
         }
 
+        .star-field {
+            position: absolute;
+            width: 200%;
+            height: 100%;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .star-field.moving {
+            animation: scrollStars 0.3s linear infinite;
+        }
+
+        @keyframes scrollStars {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50px); }
+        }
+
         .star {
             position: absolute;
-            width: 2px;
-            height: 2px;
             background: #fff;
             border-radius: 50%;
-            opacity: 0.5;
         }
 
-        /* NAVE */
-       .spaceship {
-    position: absolute;
-    top: 180px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 64px;
-    height: 64px;
-    image-rendering: pixelated;
-    z-index: 10;
-    opacity: 1;
-
-    transition: top 1s ease-out;
-}
-        
-}
-
-        .spaceship.visible {
+        .spaceship {
+            position: absolute;
             top: 180px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 64px;
+            height: 64px;
+            image-rendering: pixelated;
+            z-index: 10;
+            opacity: 1;
         }
 
-        /* Luz da nave */
-        .spaceship.visible::after {
+        .spaceship::after {
             content: '';
             position: absolute;
             bottom: -20px;
@@ -83,7 +101,55 @@
             50% { opacity: 1; }
         }
 
-        /* BALÃO DA NAVE - MAIOR E COM QUEBRA DE LINHA */
+        .ship-engine {
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 20px;
+            background: linear-gradient(to bottom, #ff6600, #ffcc00, #ff3300);
+            border-radius: 50%;
+            opacity: 0;
+            filter: blur(5px);
+            z-index: 9;
+        }
+
+        .ship-engine.active {
+            animation: engineGlow 0.2s ease-in-out infinite;
+            opacity: 1;
+        }
+
+        @keyframes engineGlow {
+            0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.8; }
+            50% { transform: translateX(-50%) scale(1.2); opacity: 1; }
+        }
+
+        .teleport-beam {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 0px;
+            background: linear-gradient(to top, #00ffaa, #00ffff);
+            box-shadow: 0 0 20px #00ffff, 0 0 40px #00ffaa;
+            opacity: 0;
+            z-index: 8;
+            border-radius: 2px;
+        }
+
+        .teleport-beam.active {
+            animation: beamUp 1.5s ease-out forwards;
+        }
+
+        @keyframes beamUp {
+            0% { height: 0px; opacity: 0; }
+            20% { height: 200px; opacity: 1; }
+            80% { height: 200px; opacity: 1; }
+            100% { height: 250px; opacity: 0; }
+        }
+
         .ship-bubble {
             position: absolute;
             top: 70px;
@@ -131,7 +197,6 @@
             z-index: 1;
         }
 
-        /* BALÃO DO PERSONAGEM - MAIOR E COM QUEBRA DE LINHA */
         .player-bubble {
             position: absolute;
             bottom: 150px;
@@ -178,7 +243,6 @@
             z-index: 1;
         }
 
-        /* PERSONAGEM */
         .player {
             position: absolute;
             bottom: 80px;
@@ -194,7 +258,11 @@
             z-index: 5;
         }
 
-        /* Chão */
+        .player.boarding {
+            opacity: 0;
+            bottom: 250px;
+        }
+
         .ground {
             position: absolute;
             bottom: 0;
@@ -202,6 +270,10 @@
             height: 80px;
             background: linear-gradient(to bottom, #1a1a2e, #0a0a1a);
             border-top: 4px solid #333;
+        }
+
+        .ground.hidden {
+            opacity: 0;
         }
 
         .game-title {
@@ -212,7 +284,6 @@
             color: #666;
             font-size: 8px;
             opacity: 0;
-            transition: opacity 1s;
         }
 
         .game-title.visible {
@@ -253,9 +324,28 @@
         .advance-hint.show {
             opacity: 1;
         }
-        /* =========================
-   DOCUMENTO
-========================= */
+
+        .next-scene-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #00ffaa;
+            font-size: 10px;
+            opacity: 0;
+            text-align: center;
+            text-shadow: 0 0 10px #00ffaa;
+        }
+
+        .next-scene-hint.show {
+            animation: pulseText 1.5s ease-in-out infinite;
+            opacity: 1;
+        }
+
+        @keyframes pulseText {
+            0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+        }
 
         .document-scene {
             position: absolute;
@@ -269,6 +359,11 @@
 
         .document-scene.show {
             display: flex;
+        }
+
+        .document-scene.hiding {
+            opacity: 0;
+            transition: opacity 0.5s;
         }
 
         .document-image {
@@ -290,23 +385,57 @@
             font-size: 7px;
         }
 
-        /* Animação de sumir */
-        .document-scene.hiding {
+        /* Cutscene 2: Mensagem de diálogo */
+        .ship-dialogue {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 30;
             opacity: 0;
-            transition: opacity 0.5s;
+        }
+
+        .ship-dialogue.show {
+            opacity: 1;
+        }
+
+        .ship-dialogue p {
+            color: #fff;
+            font-size: 10px;
+            line-height: 2;
+            text-shadow: 2px 2px #000;
+        }
+
+        .ship-dialogue .arrow {
+            color: #00ffaa;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 0.5s ease-in-out infinite;
+            margin-top: 15px;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(5px); }
         }
     </style>
 </head>
 <body>
     <div class="game-screen" id="screen">
-        <div class="stars" id="stars"></div>
+        <div class="stars" id="stars">
+            <div class="star-field" id="starField"></div>
+        </div>
         
         <div class="game-title" id="title">QUIZ PIXEL ADVENTURE</div>
         
-        <!-- NAVE -->
         <img src="image/navepixel.png" class="spaceship" id="spaceship">
         
-        <!-- Balões da nave -->
+        <div class="ship-engine" id="shipEngine"></div>
+        
+        <div class="teleport-beam" id="teleportBeam"></div>
+        
         <div class="ship-bubble" id="shipBubble1">
             colocamos você aqui pela ordem do nosso imperador viltrumita (vitor sinuquinha), mas não se preocupe, você pode sair...
         </div>
@@ -315,10 +444,8 @@
             simples! basta assinar esse papelzinho aqui, e a gente te leva pra casa rapidinho...
         </div>
         
-        <!-- PERSONAGEM -->
         <div class="player" id="player"></div>
         
-        <!-- Balões do personagem -->
         <div class="player-bubble" id="playerBubble1">
             oh, onde estou?
         </div>
@@ -327,181 +454,274 @@
             posso? como?
         </div>
 
-        <!-- Documento -->
         <div class="document-scene" id="documentScene">
             <img src="image/certidao-de-casamento.png" class="document-image">
-            <input 
-                type="text" 
-                id="nameInput"
-                class="document-input"
-                placeholder="Digite aqui..."
-            >
+            <input type="text" id="nameInput" class="document-input" placeholder="Digite aqui...">
         </div>
         
-        <!-- Chão -->
-        <div class="ground"></div>
+        <div class="ground" id="ground"></div>
         
-        <!-- Hints -->
-        <div class="advance-hint" id="advanceHint">
-            ▼ Clique para continuar
+        <div class="advance-hint" id="advanceHint">▼ Clique para continuar</div>
+        
+        <div class="continue-hint" id="continueHint">FIM DA CUTSCENE</div>
+
+        <div class="next-scene-hint" id="nextSceneHint">
+            ★ NOIVA RESGATADA ★<br><br>Aguarde...
         </div>
-        
-        <div class="continue-hint" id="continueHint">
-            FIM DA CUTSCENE
+
+        <!-- Cutscene 2: NAVE VOANDO -->
+        <div class="ship-dialogue" id="shipDialogue">
+            <p>Viajando pelo espaço...</p>
+            <p class="arrow">▼</p>
         </div>
     </div>
 
-    <script>
-        // Elementos
-        const spaceship = document.getElementById('spaceship');
-        const player = document.getElementById('player');
-        const screen = document.getElementById('screen');
-        const starsContainer = document.getElementById('stars');
-        const title = document.getElementById('title');
-        const advanceHint = document.getElementById('advanceHint');
-        const continueHint = document.getElementById('continueHint');
-        const documentScene = document.getElementById('documentScene');
-        const nameInput = document.getElementById('nameInput');
+<div class="background-container" id="bgContainer">
+    <img src="image/themper.png" id="background" class="background-image" alt="Fundo">
+</div>
 
-        // Balões - ordem correta do diálogo
-        const bubbles = [
-            { element: 'playerBubble1', type: 'player' },
-            { element: 'shipBubble1', type: 'ship' },
-            { element: 'playerBubble2', type: 'player' },
-            { element: 'shipBubble2', type: 'ship' }
-        ];
+<script>
+    const spaceship = document.getElementById('spaceship');
+    const player = document.getElementById('player');
+    const screen = document.getElementById('screen');
+    const starField = document.getElementById('starField');
+    const title = document.getElementById('title');
+    const advanceHint = document.getElementById('advanceHint');
+    const continueHint = document.getElementById('continueHint');
+    const documentScene = document.getElementById('documentScene');
+    const nameInput = document.getElementById('nameInput');
+    const teleportBeam = document.getElementById('teleportBeam');
+    const nextSceneHint = document.getElementById('nextSceneHint');
+    const shipEngine = document.getElementById('shipEngine');
+    const ground = document.getElementById('ground');
+    const shipDialogue = document.getElementById('shipDialogue');
+    const background = document.getElementById('background');
+    const bgContainer = document.getElementById('bgContainer');
 
-        let currentBubble = 0;
-        let dialogueActive = true;
+    const bubbles = [
+        { element: 'playerBubble1', type: 'player' },
+        { element: 'shipBubble1', type: 'ship' },
+        { element: 'playerBubble2', type: 'player' },
+        { element: 'shipBubble2', type: 'ship' }
+    ];
 
-        // Criar estrelas
-        function createStars() {
-            for (let i = 0; i < 50; i++) {
-                const star = document.createElement('div');
-                star.className = 'star';
-                star.style.left = Math.random() * 100 + '%';
-                star.style.top = Math.random() * 80 + '%';
-                starsContainer.appendChild(star);
-            }
+    let currentBubble = 0;
+    let dialogueActive = true;
+    let gamePhase = 'cutscene1';
+
+    function createStars() {
+        for (let i = 0; i < 40; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = (Math.random() * 200 - 50) + '%';
+            star.style.top = (Math.random() * 80) + '%';
+            star.style.width = (Math.random() * 2 + 1) + 'px';
+            star.style.height = star.style.width;
+            star.style.opacity = Math.random() * 0.5 + 0.3;
+            starField.appendChild(star);
         }
+    }
 
-        // Mostrar próximo balão
-        function showNextBubble() {
-            if (currentBubble >= bubbles.length) {
-                dialogueActive = false;
-                advanceHint.classList.remove('show');
-
-                // Mostrar documento
-                setTimeout(() => {
-                    documentScene.classList.add('show');
-                    nameInput.focus(); // Foca no input automaticamente
-                }, 500);
-
-                return;
-            }
-
-            const bubble = bubbles[currentBubble];
-            const element = document.getElementById(bubble.element);
-            
-            if (element) {
-                element.classList.add('show');
-                currentBubble++;
-                
-                if (currentBubble < bubbles.length) {
-                    setTimeout(() => {
-                        advanceHint.classList.add('show');
-                    }, 500);
-                }
-            }
-        }
-
-        // Esconder balão atual
-        function hideCurrentBubble() {
-            if (currentBubble > 0) {
-                const prevBubble = bubbles[currentBubble - 1];
-                const element = document.getElementById(prevBubble.element);
-                if (element) {
-                    element.classList.remove('show');
-                }
-            }
-        }
-
-        // Cutscene inicial
-        function playCutscene() {
-            setTimeout(() => {
-                spaceship.classList.add('.visible');
-            }, 500);
-
-            setTimeout(() => {
-                player.style.opacity = '1';
-                startFall();
-            }, 1500);
-
-            setTimeout(() => {
-                showNextBubble();
-            }, 2500);
-        }
-
-        // Queda
-        let fallPosition = 220;
-        let falling = false;
-        
-        function startFall() {
-            falling = true;
-            fall();
-        }
-        
-        function fall() {
-            if (!falling) return;
-            
-            fallPosition -= 8;
-            player.style.bottom = fallPosition + 'px';
-            
-            if (fallPosition > 80) {
-                requestAnimationFrame(fall);
-            } else {
-                player.style.bottom = '80px';
-            }
-        }
-
-        // Ocultar documento quando pressionar Enter
-        nameInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && nameInput.value.trim() !== '') {
-                // Adiciona classe de transição
-                documentScene.classList.add('hiding');
-                
-                // Esconde após a transição
-                setTimeout(() => {
-                    documentScene.classList.remove('show');
-                    documentScene.classList.remove('hiding');
-                    
-                    // Mostra tela de conclusão
-                    title.classList.add('visible');
-                    continueHint.classList.add('show');
-                }, 500);
-            }
-        });
-
-        // Clique para advance
-        screen.addEventListener('click', function() {
-            if (!dialogueActive) {
-                title.classList.add('visible');
-                continueHint.classList.add('show');
-                return;
-            }
-
-            hideCurrentBubble();
+    function showNextBubble() {
+        if (currentBubble >= bubbles.length) {
+            dialogueActive = false;
             advanceHint.classList.remove('show');
+            setTimeout(() => {
+                documentScene.classList.add('show');
+                nameInput.focus();
+            }, 500);
+            return;
+        }
+
+        const bubble = bubbles[currentBubble];
+        const element = document.getElementById(bubble.element);
+        
+        if (element) {
+            element.classList.add('show');
+            currentBubble++;
+            
+            if (currentBubble < bubbles.length) {
+                setTimeout(() => {
+                    advanceHint.classList.add('show');
+                }, 500);
+            }
+        }
+    }
+
+    function hideCurrentBubble() {
+        if (currentBubble > 0) {
+            const prevBubble = bubbles[currentBubble - 1];
+            const element = document.getElementById(prevBubble.element);
+            if (element) {
+                element.classList.remove('show');
+            }
+        }
+    }
+
+    function playCutscene() {
+        setTimeout(() => {
+            spaceship.style.opacity = '1';
+        }, 500);
+
+        setTimeout(() => {
+            player.style.opacity = '1';
+            startFall();
+        }, 1500);
+
+        setTimeout(() => {
+            showNextBubble();
+        }, 2500);
+    }
+
+    let fallPosition = 220;
+    let falling = false;
+    
+    function startFall() {
+        falling = true;
+        fall();
+    }
+    
+    function fall() {
+        if (!falling) return;
+        
+        fallPosition -= 8;
+        player.style.bottom = fallPosition + 'px';
+        
+        if (fallPosition > 80) {
+            requestAnimationFrame(fall);
+        } else {
+            player.style.bottom = '80px';
+            falling = false;
+        }
+    }
+
+    function teleportBackToShip() {
+        teleportBeam.classList.add('active');
+        
+        setTimeout(() => {
+            player.classList.add('boarding');
+        }, 300);
+        
+        setTimeout(() => {
+            documentScene.classList.remove('show');
+            teleportBeam.classList.remove('active');
+            spaceship.style.top = '120px';
+            nextSceneHint.classList.add('show');
             
             setTimeout(() => {
-                showNextBubble();
-            }, 300);
-            
-        });
+                startFlyScene();
+            }, 2000);
+        }, 1500);
+    }
 
-        // Iniciar
-        createStars();
-        playCutscene();
-    </script>
+    function startFlyScene() {
+        gamePhase = 'flying';
+        
+        nextSceneHint.classList.remove('show');
+        ground.classList.add('hidden');
+        shipEngine.classList.add('active');
+        spaceship.style.top = '200px';
+        
+        setTimeout(() => {
+            starField.classList.add('moving');
+        }, 500);
+        
+        setTimeout(() => {
+            shipDialogue.classList.add('show');
+        }, 1000);
+    }
+
+    // NOVA CUTSCENE: POUSO
+    function startLanding() {
+        gamePhase = 'landing';
+        
+        // Para movimento das estrelas
+        starField.classList.remove('moving');
+        shipDialogue.classList.remove('show');
+        
+        // Motor fica mais forte para descida
+        shipEngine.classList.add('active');
+        
+        // Desce a nave lentamente
+        let landingPos = 200;
+        let descending = true;
+        
+        function descend() {
+            if (!descending || gamePhase !== 'landing') return;
+            
+            landingPos -= 1.5;
+            spaceship.style.top = landingPos + 'px';
+            
+            // Bala de fogo fica mais intensa durante descida
+            if (landingPos > 150) {
+                shipEngine.style.transform = 'translateX(-50%) scale(1.5)';
+                shipEngine.style.opacity = '1';
+            }
+            
+            if (landingPos > 100) {
+                requestAnimationFrame(descend);
+            } else {
+                // Pousou!
+                spaceship.style.top = '100px';
+                shipEngine.classList.remove('active');
+                shipEngine.style.transform = 'translateX(-50%) scale(1)';
+                
+                // Mostra fundo (imagem do planeta)
+                bgContainer.style.opacity = '1';
+                
+                // Mensagem de pouso
+                setTimeout(() => {
+                    shipDialogue.querySelector('p').textContent = 'Pouso concluído!';
+                    shipDialogue.classList.add('show');
+                    
+                    setTimeout(() => {
+                        title.classList.add('visible');
+                        continueHint.classList.add('show');
+                        gamePhase = 'complete';
+                    }, 1500);
+                }, 500);
+            }
+        }
+        
+        setTimeout(descend, 500);
+    }
+
+    nameInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && nameInput.value.trim() !== '') {
+            documentScene.classList.add('hiding');
+            
+            setTimeout(() => {
+                documentScene.classList.remove('show');
+                documentScene.classList.remove('hiding');
+                teleportBackToShip();
+            }, 500);
+        }
+    });
+
+    screen.addEventListener('click', function() {
+        if (!dialogueActive) {
+            title.classList.add('visible');
+            continueHint.classList.add('show');
+            return;
+        }
+
+        hideCurrentBubble();
+        advanceHint.classList.remove('show');
+        
+        setTimeout(() => {
+            showNextBubble();
+        }, 300);
+        
+        // Se estiver voando, inicia pouso
+        if (gamePhase === 'flying') {
+            startLanding();
+        }
+    });
+
+    createStars();
+    playCutscene();
+</script>
+</body>
+</html>
 </body>
 </html>
