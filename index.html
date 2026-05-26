@@ -112,45 +112,6 @@
         .player.boarding {
     bottom: 250px;
 }
-
-        .ship-engine {
-            position: absolute;
-            bottom: 220px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 30px;
-            height: 20px;
-            background: linear-gradient(to bottom, #ff6600, #ffcc00, #ff3300);
-            border-radius: 50%;
-            opacity: 0;
-            filter: blur(5px);
-            z-index: 9;
-        }
-
-        .ship-engine.active {
-            animation: engineGlow 0.2s ease-in-out infinite;
-            opacity: 1;
-        }
-
-        @keyframes engineGlow {
-            0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.8; }
-            50% { transform: translateX(-50%) scale(1.2); opacity: 1; }
-        }
-
-        .teleport-beam {
-            position: absolute;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 4px;
-            height: 0px;
-            background: linear-gradient(to top, #00ffaa, #00ffff);
-            box-shadow: 0 0 20px #00ffff, 0 0 40px #00ffaa;
-            opacity: 0;
-            z-index: 8;
-            border-radius: 2px;
-        }
-
         .teleport-beam.active {
             animation: beamUp 1.5s ease-out forwards;
         }
@@ -263,7 +224,7 @@
     width: 32px;
     height: 48px;
 
-    background-image: url('image/she2.png');
+    background-image: url('./image/pxArt.png');
     background-size: 32px 48px;
     background-repeat: no-repeat;
 
@@ -277,7 +238,6 @@
         bottom 1s ease,
         opacity 1s ease;
 }
-
 .scene-image {
 
     position: absolute;
@@ -293,7 +253,7 @@
 
     transition: opacity 1s ease;
 
-    z-index: 40;
+    z-index: 51;
 
     pointer-events: none;
 }
@@ -322,7 +282,7 @@
     }
 }
 
-       .npc {
+      .npc {
     position: absolute;
 
     bottom: 80px;
@@ -336,7 +296,9 @@
 
     z-index: 50;
 
-    transition: right 1s ease-out;
+    transition: right 1s ease-out, opacity 1s ease;
+
+    opacity: 0;
 }
 
 /* posição final */
@@ -525,7 +487,7 @@
         <div class="background-container" id="bgContainer">
     <img src="image/theemper.png" id="background" class="background-image">
 </div>
-        <img src="image/pxArtnpc.png" class="npc" id="npc">
+        <img src="image/npc.png" class="npc" id="npc">
 
         <div class="stars" id="stars">
             <div class="star-field" id="starField"></div>
@@ -534,8 +496,6 @@
         <div class="game-title" id="title">QUIZ PIXEL ADVENTURE</div>
         
         <img src="image/navepixel.png" class="spaceship" id="spaceship">
-        
-        <div class="ship-engine" id="shipEngine"></div>
         
         <div class="teleport-beam" id="teleportBeam"></div>
         
@@ -563,8 +523,8 @@
         Não há imperio sem rainha...
         </div>
 
-        <img src="image/pxArtknees.png" class="scene-image" id="sceneImage1">
-        <img src="image/pxArtwedding.png" class="scene-image" id="sceneImage2">
+        <img src="image/cena1.png" class="scene-image" id="sceneImage1">
+        <img src="image/cena2.png" class="scene-image" id="sceneImage2">
 
         <div class="document-scene" id="documentScene">
             <img src="image/certidao-de-casamento.png" class="document-image">
@@ -603,7 +563,6 @@
     const nameInput = document.getElementById('nameInput');
     const teleportBeam = document.getElementById('teleportBeam');
     const nextSceneHint = document.getElementById('nextSceneHint');
-    const shipEngine = document.getElementById('shipEngine');
     const ground = document.getElementById('ground');
     const shipDialogue = document.getElementById('shipDialogue');
     const background = document.getElementById('background');
@@ -621,6 +580,7 @@
     let currentBubble = 0;
     let dialogueActive = true;
     let gamePhase = 'cutscene1';
+    let landingStage = 0;
 
     function createStars() {
         for (let i = 0; i < 40; i++) {
@@ -765,7 +725,6 @@
         
         nextSceneHint.classList.remove('show');
         ground.classList.add('hidden');
-        shipEngine.classList.add('active');
         spaceship.style.top = '200px';
         
         setTimeout(() => {
@@ -792,9 +751,6 @@
 
     shipDialogue.classList.remove('show');
 
-    // liga motor
-    shipEngine.classList.add('active');
-
     // nave desaparece da viagem
     spaceship.style.opacity = '0';
 
@@ -808,8 +764,6 @@
 
         spaceship.style.top = '-120px';
 
-        shipEngine.style.bottom = '520px';
-
         spaceship.style.opacity = '1';
 
                 // pequena pausa
@@ -818,11 +772,7 @@
             // anima descida
             spaceship.style.transition = 'top 4s linear';
 
-            shipEngine.style.transition = 'bottom 4s linear';
-
-            spaceship.style.top = '180px';
-
-            shipEngine.style.bottom = '220px';
+            spaceship.style.top = '300px';
 
         }, 100);
 
@@ -837,11 +787,6 @@ setTimeout(() => {
 
     // SOME COM O TEXTO
     shipDialogue.classList.remove('show');
-
-    // npc entra
-    npc.style.opacity = '1';
-
-    npc.classList.add('enter');
 
     // npc fala
 setTimeout(() => {
@@ -941,12 +886,82 @@ function playerActionCutscene() {
         
         shipDialogue.classList.remove('show');
         
+        player.style.opacity = '1';
+
+        player.style.left = '55%';
+
+        player.style.bottom = '80px';
+
+        player.classList.remove('boarding');
+
         gamePhase = 'landing';
 
         bgContainer.style.opacity = '1';
         return;
     }
+    
+if (gamePhase === 'landing') {
 
+    // clique 1 → npc entra
+    if (landingStage === 0) {
+
+        npc.style.opacity = '1';
+
+        npc.classList.add('enter');
+
+        landingStage++;
+
+        return;
+    }
+
+    // clique 2 → fala npc
+    if (landingStage === 1) {
+
+        npcBubble.classList.add('show');
+
+        landingStage++;
+
+        return;
+    }
+
+    // clique 3 → inicia imagens
+    if (landingStage === 2) {
+
+        npcBubble.classList.remove('show');
+
+        // some tudo
+        spaceship.style.opacity = '0';
+        player.style.opacity = '0';
+        npc.style.opacity = '0';
+
+        // mostra imagens
+        sceneImage1.style.opacity = '1';
+
+        setTimeout(() => {
+
+            sceneImage1.style.opacity = '0';
+
+            sceneImage2.style.opacity = '1';
+
+        }, 3000);
+
+        setTimeout(() => {
+
+            sceneImage2.style.opacity = '0';
+
+            title.classList.add('visible');
+
+            continueHint.classList.add('show');
+
+            gamePhase = 'complete';
+
+        }, 6000);
+
+        landingStage++;
+
+        return;
+    }
+}
     // CUTSCENE FINAL
     if (gamePhase === 'complete') {
         return;
