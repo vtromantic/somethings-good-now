@@ -787,46 +787,11 @@ setTimeout(() => {
 
     // SOME COM O TEXTO
     shipDialogue.classList.remove('show');
-
-    // npc fala
-setTimeout(() => {
-
-    npcBubble.classList.add('show');
-
-    // espera fala
     setTimeout(() => {
 
-        // esconde fala
-        npcBubble.classList.remove('show');
+    shipDialogue.classList.remove('show');
 
-        // PRIMEIRA IMAGEM
-        sceneImage1.style.opacity = '1';
-
-        setTimeout(() => {
-
-            // troca pra segunda
-            sceneImage1.style.opacity = '0';
-
-            sceneImage2.style.opacity = '1';
-
-        }, 3000);
-
-        // termina
-        setTimeout(() => {
-
-            sceneImage2.style.opacity = '0';
-
-            title.classList.add('visible');
-
-            continueHint.classList.add('show');
-
-            gamePhase = 'complete';
-
-        }, 6000);
-
-    }, 3500);
-
-}, 1200);
+}, 1500);
 
 }, 1500);
 
