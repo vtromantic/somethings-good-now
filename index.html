@@ -289,6 +289,72 @@
         opacity 1s ease;
 }
 
+.scene-image {
+
+    position: absolute;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    opacity: 0;
+
+    transition: opacity 1s ease;
+
+    z-index: 40;
+
+    pointer-events: none;
+}
+
+.player.powering {
+
+    animation: powerMove 3s linear forwards;
+
+}
+
+@keyframes powerMove {
+
+    0% {
+        transform: translateX(-50%) scale(1);
+        filter: brightness(1);
+    }
+
+    50% {
+        transform: translateX(-50%) scale(1.1);
+        filter: brightness(2);
+    }
+
+    100% {
+        transform: translateX(-50%) scale(1);
+        filter: brightness(1);
+    }
+}
+
+       .npc {
+    position: absolute;
+
+    bottom: 80px;
+
+    right: -100px;
+
+    width: 32px;
+    height: 48px;
+
+    image-rendering: pixelated;
+
+    z-index: 5;
+
+    transition: right 1s ease-out;
+}
+
+/* posição final */
+.npc.enter {
+    right: 120px;
+}
+
         .ground {
             position: absolute;
             bottom: 0;
@@ -297,6 +363,22 @@
             background: linear-gradient(to bottom, #1a1a2e, #0a0a1a);
             border-top: 4px solid #333;
         }
+
+        #npcBubble {
+    bottom: 150px;
+
+    left: auto;
+
+    right:-5px;
+
+    transform: scale(0);
+
+    transform-origin: bottom right;
+}
+
+#npcBubble.show {
+    transform: scale(1);
+}
 
         .ground.hidden {
             opacity: 0;
@@ -454,7 +536,8 @@
         <div class="background-container" id="bgContainer">
     <img src="image/theemper.png" id="background" class="background-image">
 </div>
-    
+        <img src="image/pxArtnpc.png" class="npc" id="npc">
+
         <div class="stars" id="stars">
             <div class="star-field" id="starField"></div>
         </div>
@@ -485,6 +568,15 @@
             posso? como?
         </div>
 
+        <div class="player-bubble" id="npcBubble">
+        Posso comandar exercitos...<br>
+        Mas sem você, não sou um rei...<br>
+        Não há imperio sem rainha...
+        </div>
+
+        <img src="image/cena1.png" class="scene-image" id="sceneImage1">
+        <img src="image/cena2.png" class="scene-image" id="sceneImage2">
+
         <div class="document-scene" id="documentScene">
             <img src="image/certidao-de-casamento.png" class="document-image">
             <input type="text" id="nameInput" class="document-input" placeholder="Digite aqui...">
@@ -509,6 +601,8 @@
 
 
 <script>
+    const npc = document.getElementById('npc');
+    const npcBubble = document.getElementById('npcBubble');
     const spaceship = document.getElementById('spaceship');
     const player = document.getElementById('player');
     const screen = document.getElementById('screen');
@@ -525,6 +619,8 @@
     const shipDialogue = document.getElementById('shipDialogue');
     const background = document.getElementById('background');
     const bgContainer = document.getElementById('bgContainer');
+    const sceneImage1 = document.getElementById('sceneImage1');
+    const sceneImage2 = document.getElementById('sceneImage2');
 
     const bubbles = [
         { element: 'playerBubble1', type: 'player' },
@@ -550,33 +646,47 @@
         }
     }
 
-    function showNextBubble() {
-       if (currentBubble >= bubbles.length) {
+   function showNextBubble() {
+
+    if (currentBubble >= bubbles.length) {
+
     dialogueActive = false;
+
     advanceHint.classList.remove('show');
 
     setTimeout(() => {
+
         documentScene.classList.add('show');
+
         nameInput.focus();
+
     }, 500);
 
     return;
-}
 
-        const bubble = bubbles[currentBubble];
-        const element = document.getElementById(bubble.element);
-        
-        if (element) {
-            element.classList.add('show');
-            currentBubble++;
-            
-            if (currentBubble < bubbles.length) {
-                setTimeout(() => {
-                    advanceHint.classList.add('show');
-                }, 500);
-            }
+    }
+
+    const bubble = bubbles[currentBubble];
+
+    const element = document.getElementById(bubble.element);
+
+    if (element) {
+
+        element.classList.add('show');
+
+        currentBubble++;
+
+        if (currentBubble < bubbles.length) {
+
+            setTimeout(() => {
+
+                advanceHint.classList.add('show');
+
+            }, 500);
+
         }
     }
+   }
 
     function hideCurrentBubble() {
         if (currentBubble > 0) {
@@ -730,21 +840,61 @@
         // termina pouso
         setTimeout(() => {
 
-            shipEngine.classList.remove('active');
-
             shipDialogue.querySelector('p').textContent = 'Pouso concluído!';
 
-            shipDialogue.classList.add('show');
+shipDialogue.classList.add('show');
 
-            setTimeout(() => {
+setTimeout(() => {
 
-                title.classList.add('visible');
+    // SOME COM O TEXTO
+    shipDialogue.classList.remove('show');
 
-                continueHint.classList.add('show');
+    // npc entra
+    npc.style.opacity = '1';
 
-                gamePhase = 'complete';
+    npc.classList.add('enter');
 
-            }, 1500);
+    // npc fala
+setTimeout(() => {
+
+    npcBubble.classList.add('show');
+
+    // espera fala
+    setTimeout(() => {
+
+        // esconde fala
+        npcBubble.classList.remove('show');
+
+        // PRIMEIRA IMAGEM
+        sceneImage1.style.opacity = '1';
+
+        setTimeout(() => {
+
+            // troca pra segunda
+            sceneImage1.style.opacity = '0';
+
+            sceneImage2.style.opacity = '1';
+
+        }, 3000);
+
+        // termina
+        setTimeout(() => {
+
+            sceneImage2.style.opacity = '0';
+
+            title.classList.add('visible');
+
+            continueHint.classList.add('show');
+
+            gamePhase = 'complete';
+
+        }, 6000);
+
+    }, 3500);
+
+}, 1200);
+
+}, 1500);
 
         }, 4500);
 
@@ -763,6 +913,27 @@
         }
     });
     
+function playerActionCutscene() {
+
+    // começa animação
+    player.classList.add('powering');
+
+    // aqui você pode trocar imagem no meio da animação
+    setTimeout(() => {
+
+        player.style.backgroundImage = "url('image/novaImagem.png')";
+
+    }, 1500);
+
+    // termina animação
+    setTimeout(() => {
+
+        player.classList.remove('powering');
+
+        console.log('cutscene terminou');
+
+    }, 3000);
+}
 
    screen.addEventListener('click', function() {
 
